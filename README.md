@@ -2,7 +2,7 @@
 
 # 🚀 CodeSwarm-Agent
 
-### *面向仓库级开发任务的多智能体协作、代码检索与补丁验证*
+### *面向仓库级开发任务的多智能体协作、代码修改与验证*
 
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/编排-LangGraph-167b70)](https://github.com/langchain-ai/langgraph)
@@ -14,21 +14,21 @@
 
 ## 📖 项目背景
 
-仓库级开发任务通常跨越多个模块。随着 Agent 从代码定位进入修改与验证，三个问题直接影响最终补丁的质量。
+仓库级开发任务通常跨越多个模块。随着 Agent 从代码定位进入修改与验证，三个问题直接影响代码交付的质量。
 
 1. **协作边界**。调用关系和测试覆盖可以并行调查，多名 Worker 同时修改已有文件却可能引入冲突。
 2. **上下文预算**。源码片段、工具输出和测试日志持续累积。过早丢弃原文，又会让后续判断失去依据。
-3. **完成判定**。Worker 报告完成时，候选补丁仍需在集成后的代码上接受验证。
+3. **完成判定**。Worker 完成子任务后，系统还需对集成后的代码运行验收测试。
 
-CodeSwarm-Agent 基于 Trae Agent 和 LangGraph 构建，由 Manager V2 组织调查、修改和验收，并将选中的补丁与验证证据关联。
+CodeSwarm-Agent 基于 Trae Agent 和 LangGraph 构建，由 Manager V2 组织调查、修改和验收，交付修改后的代码及对应的验证结果。
 
 ---
 
 ## 🎯 实验动机
 
-> 哪些工作值得并行？哪些证据必须保留？满足什么条件，Manager 才能接受一个补丁？
+> 哪些工作值得并行？哪些证据必须保留？修改后的代码应满足哪些验收条件？
 
-项目围绕这三个问题设计执行策略。Manager 根据任务边界和已有证据调整分工，检索器根据当前工作区版本筛选代码，上下文管理器保存可回读的原文。补丁进入集成阶段后，由测试结果和风险规则共同约束完成判定。
+项目围绕这三个问题设计执行策略。Manager 根据任务边界和已有证据调整分工，检索器根据当前工作区版本筛选代码，上下文管理器保存可回读的原文。集成各项代码修改后，Manager 根据测试结果和风险规则判定任务是否完成。
 
 ---
 
@@ -41,7 +41,7 @@ CodeSwarm-Agent 基于 Trae Agent 和 LangGraph 构建，由 Manager V2 组织�
 | 🎛️ Manager V2 | 验收规划、派发与重新路由 | LangGraph、规则约束与模型决策 |
 | 🔍 仓库检索 | 定位与任务相关的代码 | 路径与符号、BM25、AST 关系、可选 Dense、RRF |
 | 🗜️ 上下文管理 | 控制窗口增长、保留原始证据 | 临时召回清理、阈值摘要、Artifact 按需回读 |
-| 🧪 执行与验收 | 隔离修改、集成补丁与测试 | Git worktree、执行后端、按风险触发独立审查 |
+| 🧪 执行与验收 | 隔离修改、集成代码改动与测试 | Git worktree、执行后端、按风险触发独立审查 |
 | 🔭 恢复与观测 | 保存进度并追踪模型和工具调用 | SQLite Checkpoint、本地 JSONL、可选 LangSmith |
 
 ### 数据流全景
@@ -53,9 +53,9 @@ Manager V2 制定验收计划，选择直接执行或分派 Worker
     ↓
 按需检索代码 → 在隔离工作区调查与修改 → 保存证据 Artifact
     ↓
-集成候选补丁 → 执行验证 → 按风险触发独立审查
+集成代码改动 → 运行验收测试 → 按风险触发独立审查
     ↓
-返回选中的补丁 Artifact ID 与验证结果
+交付修改后的代码与验证结果
 ```
 
 ---
@@ -65,7 +65,7 @@ Manager V2 制定验收计划，选择直接执行或分派 Worker
 ### 🎛️ 1. Manager V2 自适应编排
 
 - **动态路由**。Manager 先制定验收计划，再决定直接执行或委派 Worker。工具失败或新证据出现时，可重新评估分工。
-- **读写分离调度**。独立的只读调查并行运行，对已有代码的修改串行推进，减少补丁集成时的冲突。
+- **读写分离调度**。独立的只读调查并行运行，对已有代码的修改串行推进，减少合并代码改动时的冲突。
 
 ### 🔍 2. 面向当前工作区的混合代码检索
 
@@ -77,10 +77,10 @@ Manager V2 制定验收计划，选择直接执行或分派 Worker
 - **工具输出外置**。长输出以 Artifact 保存，模型窗口保留预览和引用。后续步骤可按 ID 回读正文。
 - **摘要前归档**。已消费的临时召回正文可先行清理。达到摘要阈值后，系统将本次摘要使用的旧交互和已有摘要归档，再调用摘要器。这为核对摘要遗漏保留了原始依据。
 
-### 🧪 4. 基于测试证据的补丁验收
+### 🧪 4. 基于测试证据的代码验收
 
-- **隔离执行**。Worker 在独立 Git worktree 中修改代码。集成阶段对候选补丁运行配置的验收测试，风险规则可进一步触发独立审查。
-- **交付产物**。`selected_patch_artifact_id` 标识最终选中的补丁，便于将实际改动与对应的验证结果一并复查。
+- **隔离执行**。Worker 在独立 Git worktree 中修改代码。集成后对修改后的代码运行配置的验收测试，风险规则可进一步触发独立审查。
+- **交付产物**。交付工作区中修改后的代码，并附上验收结果，便于核对改动和已执行的测试。
 
 ### 🔭 5. 断点恢复与执行轨迹
 
@@ -116,7 +116,7 @@ Copy-Item .env.example .env
 目标目录需要是已有初始提交的 Git 仓库。下例使用 `--trust-repository`，请仅对信任的仓库使用此选项。
 
 ```powershell
-uv run --locked --no-sync codeswarm-cli "Fix the reported regression" `
+uv run --locked --no-sync codeswarm-cli "Add configurable retry limits to the client and update the tests" `
   --working-dir D:/path/to/repository `
   --execution-backend windows-guarded --trust-repository `
   --test-command "python -m pytest -q"
@@ -146,7 +146,7 @@ CodeSwarm-Agent/
 │   ├── langgraph_backend.py # 状态持久化与恢复
 │   ├── context/             # 代码检索与上下文管理
 │   ├── runtime/             # 工具调用与执行后端
-│   ├── artifacts.py         # 证据与补丁 Artifact
+│   ├── artifacts.py         # 工具输出与摘要源归档
 │   └── telemetry.py         # 轨迹记录与 LangSmith 导出
 ├── trae_agent/              # 上游模型与工具适配
 ├── configs/                 # 配置
@@ -173,14 +173,14 @@ CodeSwarm-Agent/
 
 - [x] Manager V2 路由与任务恢复
 - [x] 版本感知的代码检索与摘要源归档
-- [x] 补丁验收与 LangSmith 调用追踪
+- [x] 代码验收与 LangSmith 调用追踪
 - [ ] Docker 后端端到端验证
 
 ---
 
 ## 🤝 贡献
 
-欢迎通过 Issue 或 Pull Request 讨论协作策略、代码检索和补丁验证。报告执行问题时，请附上能够复现问题的任务描述、执行后端和测试命令。
+欢迎通过 Issue 或 Pull Request 讨论协作策略、代码检索和代码验证。报告执行问题时，请附上能够复现问题的任务描述、执行后端和测试命令。
 
 ---
 
