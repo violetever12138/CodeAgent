@@ -42,7 +42,7 @@ CodeSwarm-Agent 基于 Trae Agent 和 LangGraph 构建，由 Manager V2 组织�
 | 🔍 仓库检索 | 定位与任务相关的代码 | 路径与符号、BM25、AST 关系、可选 Dense、RRF |
 | 🗜️ 上下文管理 | 控制窗口增长、保留原始证据 | 临时召回清理、阈值摘要、Artifact 按需回读 |
 | 🧪 执行与验收 | 隔离修改、集成代码改动与测试 | Git worktree、执行后端、按风险触发独立审查 |
-| 🔭 恢复与观测 | 保存进度并追踪模型和工具调用 | SQLite Checkpoint、本地 JSONL、可选 LangSmith |
+| 🔭 恢复与观测 | 保存进度并追踪模型和工具调用 | SQLite Checkpoint、LangSmith |
 
 ### 数据流全景
 
@@ -85,7 +85,7 @@ Manager V2 制定验收计划，选择直接执行或分派 Worker
 ### 🔭 5. 断点恢复与执行轨迹
 
 - **状态恢复**。LangGraph Checkpoint 持久化 Manager 状态与已确认的 Worker 结果，中断后可从运行目录继续执行。
-- **轨迹分析**。本地 JSONL 记录路由、检索、摘要和模型工具调用。启用 LangSmith 后，可按调用树查看父子关系、耗时及可用的 Token 统计。
+- **轨迹分析**。通过 LangSmith 的调用树查看模型和工具调用的父子关系、耗时及可用的 Token 统计，定位长耗时调用和执行异常。
 
 ### 📊 6. 发布版本验证
 
@@ -164,7 +164,7 @@ CodeSwarm-Agent/
 | 语言与依赖管理 | Python 3.12、uv |
 | 编排与持久化 | LangGraph、SQLite |
 | 执行与工具 | Git worktree、Windows 受控执行、Docker、MCP |
-| 可观测性 | JSONL、OpenTelemetry、LangSmith |
+| 可观测性 | OpenTelemetry、LangSmith |
 | 测试 | pytest |
 
 ---
