@@ -59,17 +59,17 @@ windows-guarded = [
 ]
 
 [project.scripts]
-codeswarm-cli = "codeswarm_agent.cli:main"
-codeswarm-eval = "codeswarm_agent.evaluation.cli:main"
-codeswarm-doctor = "codeswarm_agent.doctor:main"
-codeswarm-mcp = "codeswarm_agent.mcp_server:main"
+codeswarm-cli = "codeagent.cli:main"
+codeswarm-eval = "codeagent.evaluation.cli:main"
+codeswarm-doctor = "codeagent.doctor:main"
+codeswarm-mcp = "codeagent.mcp_server:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["trae_agent", "codeswarm_agent"]
+packages = ["trae_agent", "codeagent"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -86,7 +86,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["trae_agent", "codeswarm_agent"]
+source = ["trae_agent", "codeagent"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

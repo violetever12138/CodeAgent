@@ -118,7 +118,7 @@ Copy-Item .env.example .env
 
 ```text
 CodeAgent/
-├── codeswarm_agent/
+├── codeagent/
 │   ├── manager_graph.py     # Manager V2 执行图
 │   ├── routing.py           # 任务路由
 │   ├── langgraph_backend.py # 状态持久化与恢复
@@ -129,7 +129,7 @@ CodeAgent/
 ├── trae_agent/              # 上游模型与工具适配
 ├── configs/                 # 配置
 ├── docker/                  # 容器镜像配方
-├── tests/codeswarm_agent/    # 基础与集成测试
+├── tests/codeagent/    # 基础与集成测试
 └── trae_config.yaml.example # CLI 配置模板
 ```
 

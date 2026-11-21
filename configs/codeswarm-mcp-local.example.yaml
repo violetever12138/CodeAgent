@@ -5,7 +5,7 @@ allow_mcp_servers:
 mcp_servers:
   codeswarm_local:
     command: ${CODESWARM_PYTHON}
-    args: ["-m", "codeswarm_agent.mcp_server"]
+    args: ["-m", "codeagent.mcp_server"]
     cwd: ${CODESWARM_PACKAGE_ROOT}
     timeout: 30
     env:
