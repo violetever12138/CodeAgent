@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 CodeSwarm-Agent
+# 🚀 CodeAgent
 
 ### *面向仓库级开发任务的多智能体协作、代码修改与验证*
 
@@ -20,7 +20,7 @@
 2. **上下文预算** 源码片段、工具输出和测试日志持续累积导致上下文不足，过早丢弃原文，又会让后续判断失去依据。
 3. **断点恢复** 当任务因为不可抗因素中断，系统能够从断点恢复任务进程。
 
-CodeSwarm-Agent 基于 Trae Agent 和 LangGraph 构建，由 Manager V2 组织调查、修改和验收，交付修改后的代码及对应的验证结果。
+CodeAgent 基于 Trae Agent 和 LangGraph 构建，由 Manager V2 组织调查、修改和验收，交付修改后的代码及对应的验证结果。
 
 ---
 
@@ -117,7 +117,7 @@ Copy-Item .env.example .env
 ## 📁 仓库结构
 
 ```text
-CodeSwarm-Agent/
+CodeAgent/
 ├── codeswarm_agent/
 │   ├── manager_graph.py     # Manager V2 执行图
 │   ├── routing.py           # 任务路由
