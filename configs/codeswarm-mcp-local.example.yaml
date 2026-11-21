@@ -1,0 +1,25 @@
+# Merge these sections into the model config used by codeswarm-cli.
+# Launch is opt-in: the global and role allowlists must both permit the service.
+allow_mcp_servers:
+  - codeswarm_local
+mcp_servers:
+  codeswarm_local:
+    command: ${CODESWARM_PYTHON}
+    args: ["-m", "codeswarm_agent.mcp_server"]
+    cwd: ${CODESWARM_PACKAGE_ROOT}
+    timeout: 30
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+      CODESWARM_WORKSPACE: ${CODESWARM_WORKSPACE}
+      CODESWARM_ARTIFACT_ROOT: ${CODESWARM_ARTIFACT_ROOT}
+codeswarm:
+  mcp:
+    role_allowlist:
+      manager: [codeswarm_local]
+      worker: [codeswarm_local]
+      developer: [codeswarm_local]
+      explorer: [codeswarm_local]
+    tool_effects:
+      codeswarm_local.repository_read: read
+      codeswarm_local.artifact_read: read

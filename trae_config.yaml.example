@@ -1,0 +1,36 @@
+agents:
+  trae_agent:
+    model: codeswarm_model
+    enable_lakeview: false
+    max_steps: 200
+    tools:
+      - bash
+      - str_replace_based_edit_tool
+      - task_done
+
+codeswarm:
+  architecture_mode: manager_v2
+  context:
+    dense_backend: brute_force
+    summary_trigger_ratio: 0.75
+    summary_target_ratio: 0.50
+    summary_max_tokens: 2048
+    embedding:
+      provider: none
+      device: cpu
+
+model_providers:
+  openai:
+    provider: openai
+    api_key: ""  # Set OPENAI_API_KEY in .env or in the process environment.
+
+models:
+  codeswarm_model:
+    model_provider: openai
+    model: gpt-4.1-mini
+    max_tokens: 4096
+    temperature: 0.5
+    top_p: 1
+    top_k: 0
+    max_retries: 2
+    parallel_tool_calls: true

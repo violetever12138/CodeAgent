@@ -1,0 +1,8 @@
+.git
+.codeswarm-eval
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.log
+trajectories
